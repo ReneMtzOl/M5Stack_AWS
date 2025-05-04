@@ -23,7 +23,7 @@ void app_main(void)
         printf("Failed to initialize AXP192.\n");
     }
 
-    axp192_set_ldo2(true);
+    axp192_set_ldo2(true);  //LCD
+    axp192_set_ldo3(false); //Vibrator
     axp192_set_dcdc1(true); //MCU_VDD. NUNCA APAGAR
-    axp192_set_ldo3(false);
 }

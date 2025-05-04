@@ -12,7 +12,7 @@ esp_err_t axp192_init(void) {
     esp_err_t err = i2c_bus_read(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
     if (err != ESP_OK) return err;
 
-    // Encender DCDC1 (LCD), LDO2 (pantalla), y LDO3 (sensor)
+    // Encender DCDC1 (MCU), LDO2 (LCD), y LDO3 (VIBRATOR)
     val |= (1 << 0); // DCDC1
     val |= (1 << 2); // LDO2
     val |= (1 << 3); // LDO3
