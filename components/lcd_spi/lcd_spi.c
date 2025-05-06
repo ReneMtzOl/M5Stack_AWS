@@ -16,6 +16,7 @@
 #define PIN_NUM_CS 5
 #define PIN_NUM_DC 15
 #define PIN_NUM_RST 4
+#define PIN_NUM_BCKL 32
 
 static spi_device_handle_t lcd_handle;
 
@@ -23,7 +24,7 @@ esp_err_t lcd_spi_init(void)
 {
     esp_err_t ret = ESP_FAIL;
     gpio_config_t io_conf = {
-        .pin_bit_mask = (1ULL << PIN_NUM_DC) | (1ULL << PIN_NUM_RST),
+        .pin_bit_mask = (1ULL << PIN_NUM_DC) | (1ULL << PIN_NUM_RST) | (1ULL << PIN_NUM_BCKL),
         .mode = GPIO_MODE_OUTPUT,
         .pull_up_en = false,
         .pull_down_en = false,
@@ -45,7 +46,7 @@ esp_err_t lcd_spi_init(void)
         .sclk_io_num = PIN_NUM_CLK,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
-        .max_transfer_sz = 4096,
+        .max_transfer_sz = LCD_WIDTH * LCD_HEIGHT * 2 + 8,
     };
 
     ret = spi_bus_initialize(LCD_HOST, &buscfg, SPI_DMA_CH_AUTO);
@@ -55,7 +56,7 @@ esp_err_t lcd_spi_init(void)
     }
 
     spi_device_interface_config_t devcfg = {
-        .clock_speed_hz = 40 * 1000 * 1000,
+        .clock_speed_hz = 2000000, // Clock out at 20 MHz
         .mode = 0,
         .spics_io_num = PIN_NUM_CS,
         .queue_size = 7,
@@ -67,15 +68,17 @@ esp_err_t lcd_spi_init(void)
         return ret;
     }
 
+    
     /*
     // Minimum init sequence for ILI9342
     lcd_send_command(0xEF); // Test command
     const uint8_t data[] = {0x03, 0x80, 0x02};
     lcd_send_data(data, sizeof(data));
     */
-    lcd_send_command(0x01); // Software reset
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-
+   lcd_send_command(0x01); // Software reset
+   vTaskDelay(100 / portTICK_PERIOD_MS);
+   //return ret;
+   
     lcd_send_command(0x28); // Display OFF
     // Init sequence
     lcd_send_command(0xCF);
@@ -143,6 +146,8 @@ esp_err_t lcd_spi_init(void)
     
     lcd_send_command(0x29); //Display ON
 
+    //gpio_set_level(PIN_NUM_BCKL, 1); // Backlight ON
+
     return ESP_OK;
 }
 
@@ -151,7 +156,7 @@ void lcd_send_command(uint8_t cmd)
 {
     gpio_set_level(PIN_NUM_DC, 0); // DC = 0 -> Command
     spi_transaction_t t = {
-        .length = 0,
+        .length = 1,
         .tx_buffer = &cmd,
     };
     spi_device_transmit(lcd_handle, &t);

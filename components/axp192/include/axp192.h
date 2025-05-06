@@ -4,7 +4,9 @@
 #include "stdbool.h"
 
 esp_err_t axp192_init(void);
-esp_err_t axp192_set_dcdc1(bool enable);  // LCD backlight
+esp_err_t axp192_set_dcdc1(bool enable);  // MCU_VDD
+esp_err_t axp192_set_dcdc3(bool enable);  // Backlight
+esp_err_t axp192_set_dcdc3_voltage(float voltage); // Set DCDC3 voltage (0.7V to 3.5V)
 esp_err_t axp192_set_ldo2(bool enable);   // LCD power
 esp_err_t axp192_set_ldo3(bool enable);   // Sensor power
 esp_err_t axp192_is_charging(bool *charging);

@@ -1,10 +1,7 @@
 #pragma once
 #include "esp_err.h"
 #include "stdint.h"
-
-#pragma once #include <stdint.h>
-
-#define LCD_WIDTH  320 #define LCD_HEIGHT 240
+#include <stdint.h>
 
 
 uint16_t color565(uint8_t r, uint8_t g, uint8_t b);

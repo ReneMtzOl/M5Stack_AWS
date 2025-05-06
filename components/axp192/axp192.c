@@ -28,6 +28,23 @@ esp_err_t axp192_set_dcdc1(bool enable) {
     return i2c_bus_write(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
 }
 
+esp_err_t axp192_set_dcdc3(bool enable){
+    uint8_t val;
+    i2c_bus_read(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
+    if (enable) val |= (1 << 1);
+    else        val &= ~(1 << 1);
+    return i2c_bus_write(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
+}
+
+esp_err_t axp192_set_dcdc3_voltage(float voltage) {
+    if (voltage < 0.7 || voltage > 3.5) {
+        return ESP_ERR_INVALID_ARG; // Rango válido: 0.7V a 3.5V
+    }
+
+    uint8_t val = (uint8_t)((voltage - 0.7) / 0.025); // Pasos de 25mV
+    return i2c_bus_write(AXP192_ADDR, 0x27, &val, 1); // Registro 0x27 para DCDC3
+}
+
 esp_err_t axp192_set_ldo2(bool enable) {
     uint8_t val;
     i2c_bus_read(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
@@ -63,15 +80,14 @@ esp_err_t axp192_is_charging(bool *charging) {
     return ESP_OK;
 }
 
-
 esp_err_t axp192_get_battery_current(float *current_ma) {
     uint8_t buf[2];
-    esp_err_t err = i2c_bus_read(AXP192_ADDR, 0x7C, buf, 2); // battery discharge current
+    esp_err_t err = i2c_bus_read(AXP192_ADDR, 0x7B, buf, 2); // battery current
     if (err != ESP_OK) return err;
 
-    uint16_t raw = (buf[0] << 5) | (buf[1] & 0x1F);
-    *current_ma = raw * 0.5f;  // 0.5 mA por bit
-    return ESP_OK;
+    uint16_t raw = (buf[0] << 4) | (buf[1] & 0x0F);
+    *current_ma = raw * 0.5f; // 0.5 mA por bit
+    return ESP_OK; 
 }
 
 esp_err_t axp192_get_charge_current(float *current_ma) {
@@ -113,8 +129,4 @@ esp_err_t axp192_get_battery_level(uint8_t *percent) {
 
     *percent = (uint8_t)(((voltage - 3000.0f) / 1200.0f) * 100.0f);
     return ESP_OK;
-}
-
-uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
-    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 }
