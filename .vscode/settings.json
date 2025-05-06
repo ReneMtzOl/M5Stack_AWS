@@ -11,6 +11,7 @@
     "files.associations": {
         "*.c": "c",
         "i2c_bus.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "esp_err.h": "c"
     }
 }

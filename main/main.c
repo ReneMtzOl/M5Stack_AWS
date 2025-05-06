@@ -12,12 +12,12 @@ void app_main(void)
 {
 
     i2c_bus_init(I2C_NUM_0, GPIO_NUM_21, GPIO_NUM_22, 400000);
-    axp192_set_dcdc3(true); // Backlight ON
+    axp192_set_dcdc3(true);        // Backlight ON
     axp192_set_dcdc3_voltage(3.3); // Set DCDC3 voltage to 3.3V
-    
+
     lcd_spi_init();
     lcd_fill_color(color565(100, 0, 100)); // Fill screen with black color
-    //lcd_fill_rect(60,40,200,160,color565(255, 0, 0)); // Fill rectangle with red color
+    // lcd_fill_rect(60,40,200,160,color565(255, 0, 0)); // Fill rectangle with red color
 
     /*
         uint8_t id = 0;
@@ -36,7 +36,7 @@ void app_main(void)
         printf("Failed to initialize AXP192.\n");
     }
 
-    axp192_set_ldo2(true); // LCD
+    axp192_set_ldo2(true);  // LCD
     axp192_set_ldo3(false); // Vibrator
 
     axp192_get_battery_voltage(&vbat);
@@ -48,7 +48,7 @@ void app_main(void)
     axp192_is_charging(&charging);
 
     // axp192_set_dcdc1(true); //MCU_VDD. NUNCA APAGAR
-    
+
     printf("VBAT: %.2f mV\n", vbat);
     printf("VBUS: %.2f mV\n", vbus);
     printf("Battery current: -%.2f mA\n", discharge_current);
@@ -56,10 +56,10 @@ void app_main(void)
     printf("Temp: %.2f °C\n", temp);
     printf("Battery level: %d%%\n", level);
     printf("Charging: %s\n", charging ? "Yes" : "No");
-    
+
     while (1)
     {
-        
+
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         axp192_get_battery_voltage(&vbat);
         axp192_get_vbus_voltage(&vbus);
@@ -68,20 +68,20 @@ void app_main(void)
         axp192_get_battery_current(&discharge_current);
         axp192_get_battery_level(&level);
         axp192_is_charging(&charging);
-    
+
         printf("VBAT: %.2f mV\n", vbat);
         printf("VBUS: %.2f mV\n", vbus);
         printf("Battery current: -%.2f mA\n", discharge_current);
         printf("Charge current: +%.2f mA\n", charge_current);
         printf("Temp: %.2f °C\n", temp);
         printf("Battery level: %d%%\n", level);
-        printf("Charging: %s\n", charging ? "Yes" : "No");        
-        axp192_set_ldo3(true); //Vibrator
-        vTaskDelay(1000 / portTICK_PERIOD_MS);        
-        axp192_set_ldo3(false); //Vibrator
+        printf("Charging: %s\n", charging ? "Yes" : "No");
+        axp192_set_ldo3(true); // Vibrator
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        axp192_set_ldo3(false); // Vibrator
 
         break;
     }
-    vTaskDelay(3000/portTICK_PERIOD_MS);
+    vTaskDelay(3000 / portTICK_PERIOD_MS);
     axp192_set_dcdc3(false); // Backlight OFF
 }

@@ -236,3 +236,8 @@ void lcd_draw_bitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const uint1
     lcd_set_address_window(x, y, x + w - 1, y + h - 1);
     lcd_send_data((const uint8_t *)data, w * h * sizeof(uint16_t));
 }
+
+uint16_t color565(uint8_t r, uint8_t g, uint8_t b)
+{
+    return (r & 0xF8) << 8 | (g & 0xFC) << 3 | (b >> 3);
+}
