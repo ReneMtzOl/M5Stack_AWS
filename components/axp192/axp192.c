@@ -114,3 +114,7 @@ esp_err_t axp192_get_battery_level(uint8_t *percent) {
     *percent = (uint8_t)(((voltage - 3000.0f) / 1200.0f) * 100.0f);
     return ESP_OK;
 }
+
+uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
+    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+}

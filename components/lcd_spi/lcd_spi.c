@@ -8,6 +8,9 @@
 #define LCD_HOST SPI2_HOST
 // Se usa SPI por hardware
 
+#define LCD_WIDTH  320
+#define LCD_HEIGHT 240
+
 #define PIN_NUM_MOSI 23
 #define PIN_NUM_CLK 18
 #define PIN_NUM_CS 5
@@ -166,12 +169,65 @@ void lcd_send_data(const uint8_t *data, size_t len)
 }
 
 // Fill screen with solid color
-void lcd_fill_color(uint16_t color);
+void lcd_fill_color(uint16_t color){
+    lcd_set_address_window(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1);
+    uint8_t data[2] = {color >> 8, color & 0xFF};
+    for (int i = 0; i < LCD_WIDTH * LCD_HEIGHT; i++)
+    {
+        lcd_send_data(data, sizeof(data));
+    }
+}
 // Set adress
-void lcd_set_address_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+void lcd_set_address_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1){
+    lcd_send_command(0x2A); // Column Address Set
+    uint8_t data[4] = {x0 >> 8, x0 & 0xFF, x1 >> 8, x1 & 0xFF};
+    lcd_send_data(data, sizeof(data));
+
+    lcd_send_command(0x2B); // Row Address Set
+    data[0] = y0 >> 8;
+    data[1] = y0 & 0xFF;
+    data[2] = y1 >> 8;
+    data[3] = y1 & 0xFF;
+    lcd_send_data(data, sizeof(data));
+
+    lcd_send_command(0x2C); // Memory Write
+}
 // Set particular pixel primitive
-void lcd_draw_pixel(uint16_t x, uint16_t y, uint16_t color);
+void lcd_draw_pixel(uint16_t x, uint16_t y, uint16_t color){
+    if (x >= LCD_WIDTH || y >= LCD_HEIGHT)
+        return;
+
+    lcd_set_address_window(x, y, x, y);
+    uint8_t data[2] = {color >> 8, color & 0xFF};
+    lcd_send_data(data, sizeof(data));
+}
 // Fill rectangle primitive
-void lcd_fill_rec(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color);
+void lcd_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color){
+    if (x >= LCD_WIDTH || y >= LCD_HEIGHT)
+        return;
+
+    if (x + w > LCD_WIDTH)
+        w = LCD_WIDTH - x;
+    if (y + h > LCD_HEIGHT)
+        h = LCD_HEIGHT - y;
+
+    lcd_set_address_window(x, y, x + w - 1, y + h - 1);
+    uint8_t data[2] = {color >> 8, color & 0xFF};
+    for (int i = 0; i < w * h; i++)
+    {
+        lcd_send_data(data, sizeof(data));
+    }
+}
 // Draw entire bitmat to memory
-void lcd_draw_bitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const uint16_t *data);
+void lcd_draw_bitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const uint16_t *data){
+    if (x >= LCD_WIDTH || y >= LCD_HEIGHT)
+        return;
+
+    if (x + w > LCD_WIDTH)
+        w = LCD_WIDTH - x;
+    if (y + h > LCD_HEIGHT)
+        h = LCD_HEIGHT - y;
+
+    lcd_set_address_window(x, y, x + w - 1, y + h - 1);
+    lcd_send_data((const uint8_t *)data, w * h * sizeof(uint16_t));
+}
