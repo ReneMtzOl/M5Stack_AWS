@@ -1,14 +1,16 @@
 {
     "C_Cpp.intelliSenseEngine": "default",
-    "idf.espIdfPathWin": "C:\\Users\\mtzol\\esp\\v5.4.1\\esp-idf",
-    "idf.pythonInstallPath": "c:\\Users\\mtzol\\esp\\tools\\idf-python\\3.11.2\\python.exe",
+    "idf.espIdfPathWin": "C:\\Users\\Rene Martinez\\esp\\v5.4.1\\esp-idf",
+    "idf.pythonInstallPath": "C:\\.Espressif\\tools\\idf-python\\3.11.2\\python.exe",
     "idf.openOcdConfigs": [
         "board/esp32-wrover-kit-3.3v.cfg"
     ],
-    "idf.toolsPathWin": "c:\\Users\\mtzol\\esp",
+    "idf.toolsPathWin": "C:\\.Espressif",
     "idf.portWin": "COM3",
     "idf.flashType": "UART",
     "files.associations": {
-        "i2c_bus.h": "c"
+        "*.c": "c",
+        "i2c_bus.h": "c",
+        "stdio.h": "c"
     }
 }

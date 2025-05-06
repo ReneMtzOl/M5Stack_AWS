@@ -3,6 +3,10 @@
 #include "i2c_bus.h"
 #include "axp192.h"
 
+float vbat, vbus, temp, charge_current, discharge_current;
+uint8_t level;
+bool charging;
+
 void app_main(void)
 {
     i2c_bus_init(I2C_NUM_0, GPIO_NUM_21, GPIO_NUM_22, 400000);
@@ -23,7 +27,50 @@ void app_main(void)
         printf("Failed to initialize AXP192.\n");
     }
 
-    axp192_set_ldo2(true);  //LCD
-    axp192_set_ldo3(false); //Vibrator
-    axp192_set_dcdc1(true); //MCU_VDD. NUNCA APAGAR
+    axp192_set_ldo2(false); // LCD
+    axp192_set_ldo3(false); // Vibrator
+
+    axp192_get_battery_voltage(&vbat);
+    axp192_get_vbus_voltage(&vbus);
+    axp192_get_temperature(&temp);
+    axp192_get_charge_current(&charge_current);
+    axp192_get_battery_current(&discharge_current);
+    axp192_get_battery_level(&level);
+    axp192_is_charging(&charging);
+
+    // axp192_set_dcdc1(true); //MCU_VDD. NUNCA APAGAR
+
+    printf("VBAT: %.2f mV\n", vbat);
+    printf("VBUS: %.2f mV\n", vbus);
+    printf("Battery current: -%.2f mA\n", discharge_current);
+    printf("Charge current: +%.2f mA\n", charge_current);
+    printf("Temp: %.2f °C\n", temp);
+    printf("Battery level: %d%%\n", level);
+    printf("Charging: %s\n", charging ? "Yes" : "No");
+    
+    while (1)
+    {
+        
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        axp192_get_battery_voltage(&vbat);
+        axp192_get_vbus_voltage(&vbus);
+        axp192_get_temperature(&temp);
+        axp192_get_charge_current(&charge_current);
+        axp192_get_battery_current(&discharge_current);
+        axp192_get_battery_level(&level);
+        axp192_is_charging(&charging);
+    
+        printf("VBAT: %.2f mV\n", vbat);
+        printf("VBUS: %.2f mV\n", vbus);
+        printf("Battery current: -%.2f mA\n", discharge_current);
+        printf("Charge current: +%.2f mA\n", charge_current);
+        printf("Temp: %.2f °C\n", temp);
+        printf("Battery level: %d%%\n", level);
+        printf("Charging: %s\n", charging ? "Yes" : "No");        
+        axp192_set_ldo3(true); //Vibrator
+        vTaskDelay(1000 / portTICK_PERIOD_MS);        
+        axp192_set_ldo3(false); //Vibrator
+
+        break;
+    }
 }
