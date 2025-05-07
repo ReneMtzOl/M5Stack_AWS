@@ -45,6 +45,15 @@ esp_err_t axp192_set_dcdc3_voltage(float voltage) {
     return i2c_bus_write(AXP192_ADDR, 0x27, &val, 1); // Registro 0x27 para DCDC3
 }
 
+esp_err_t axp192_set_dcdc2_voltage(float voltage) {
+    if (voltage < 0.7 || voltage > 2.275) {
+        return ESP_ERR_INVALID_ARG; // Rango válido: 0.7V a 2.275V
+    }
+
+    uint8_t val = (uint8_t)((voltage - 0.7) / 0.025); // Pasos de 25mV
+    return i2c_bus_write(AXP192_ADDR, 0x23, &val, 1); // Registro 0x23 para DCDC2
+}
+
 esp_err_t axp192_set_ldo2(bool enable) {
     uint8_t val;
     i2c_bus_read(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
@@ -129,4 +138,55 @@ esp_err_t axp192_get_battery_level(uint8_t *percent) {
 
     *percent = (uint8_t)(((voltage - 3000.0f) / 1200.0f) * 100.0f);
     return ESP_OK;
+}
+
+esp_err_t axp192_set_ldo1_voltage(float voltage) {
+    if (voltage < 1.8 || voltage > 3.3) {
+        return ESP_ERR_INVALID_ARG; // Rango válido: 1.8V a 3.3V
+    }
+
+    uint8_t val = (uint8_t)((voltage - 1.8) / 0.1); // Pasos de 100mV
+    return i2c_bus_write(AXP192_ADDR, 0x28, &val, 1); // Registro 0x28 para LDO1
+}
+
+esp_err_t axp192_set_rtc_ldo_voltage(float voltage) {
+    if (voltage < 1.8 || voltage > 3.3) {
+        return ESP_ERR_INVALID_ARG; // Rango válido: 1.8V a 3.3V
+    }
+
+    uint8_t val = (uint8_t)((voltage - 1.8) / 0.1); // Pasos de 100mV
+    return i2c_bus_write(AXP192_ADDR, 0x91, &val, 1); // Registro 0x91 para RTC LDO
+}
+
+esp_err_t axp192_set_ldo1(bool enable) {
+    uint8_t val;
+    esp_err_t err = i2c_bus_read(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
+    if (err != ESP_OK) return err;
+
+    if (enable) val |= (1 << 4); // Bit 4 controla LDO1
+    else        val &= ~(1 << 4);
+
+    return i2c_bus_write(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
+}
+
+esp_err_t axp192_set_rtc_ldo(bool enable) {
+    uint8_t val;
+    esp_err_t err = i2c_bus_read(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
+    if (err != ESP_OK) return err;
+
+    if (enable) val |= (1 << 5); // Bit 5 controla RTC LDO
+    else        val &= ~(1 << 5);
+
+    return i2c_bus_write(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
+}
+
+esp_err_t axp192_set_dcdc2(bool enable) {
+    uint8_t val;
+    esp_err_t err = i2c_bus_read(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
+    if (err != ESP_OK) return err;
+
+    if (enable) val |= (1 << 1); // Bit 1 controla DCDC2
+    else        val &= ~(1 << 1);
+
+    return i2c_bus_write(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
 }
