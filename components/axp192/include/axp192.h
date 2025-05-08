@@ -153,3 +153,30 @@ esp_err_t axp192_get_temperature(float *temp_c);
  * @return ESP_OK on success, or an error code on failure.
  */
 esp_err_t axp192_get_battery_level(uint8_t *percent);
+
+/**
+ * @brief Configure the mode of a GPIO pin.
+ * 
+ * @param gpio GPIO pin number (0-4).
+ * @param mode Mode to set (e.g., input, output, etc.).
+ * @return ESP_OK on success, or an error code on failure.
+ */
+esp_err_t axp192_set_gpio_mode(uint8_t gpio, uint8_t mode);
+
+/**
+ * @brief Set the state of a GPIO pin.
+ * 
+ * @param gpio GPIO pin number (0-4).
+ * @param state True to set the pin high, false to set it low.
+ * @return ESP_OK on success, or an error code on failure.
+ */
+esp_err_t axp192_set_gpio_state(uint8_t gpio, bool state);
+
+/**
+ * @brief Get the state of a GPIO pin.
+ * 
+ * @param gpio GPIO pin number (0-4).
+ * @param state Pointer to a boolean where the state will be stored.
+ * @return ESP_OK on success, or an error code on failure.
+ */
+esp_err_t axp192_get_gpio_state(uint8_t gpio, bool *state);

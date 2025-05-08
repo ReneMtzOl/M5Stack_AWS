@@ -190,3 +190,36 @@ esp_err_t axp192_set_dcdc2(bool enable) {
 
     return i2c_bus_write(AXP192_ADDR, AXP_PWR_CTRL, &val, 1);
 }
+
+esp_err_t axp192_set_gpio_mode(uint8_t gpio, uint8_t mode) {
+    if (gpio > 4) return ESP_ERR_INVALID_ARG; // Solo GPIO0 a GPIO4
+
+    uint8_t reg = 0x90 + gpio; // Registro base para GPIO0 es 0x90
+    return i2c_bus_write(AXP192_ADDR, reg, &mode, 1);
+}
+
+esp_err_t axp192_set_gpio_state(uint8_t gpio, bool state) {
+    if (gpio > 4) return ESP_ERR_INVALID_ARG; // Solo GPIO0 a GPIO4
+
+    uint8_t reg = 0x94; // Registro para controlar el estado de los GPIO
+    uint8_t val;
+    esp_err_t err = i2c_bus_read(AXP192_ADDR, reg, &val, 1);
+    if (err != ESP_OK) return err;
+
+    if (state) val |= (1 << gpio); // Establecer el bit correspondiente
+    else       val &= ~(1 << gpio); // Limpiar el bit correspondiente
+
+    return i2c_bus_write(AXP192_ADDR, reg, &val, 1);
+}
+
+esp_err_t axp192_get_gpio_state(uint8_t gpio, bool *state) {
+    if (gpio > 4 || state == NULL) return ESP_ERR_INVALID_ARG; // Validar argumentos
+
+    uint8_t reg = 0x94; // Registro para leer el estado de los GPIO
+    uint8_t val;
+    esp_err_t err = i2c_bus_read(AXP192_ADDR, reg, &val, 1);
+    if (err != ESP_OK) return err;
+
+    *state = (val & (1 << gpio)) != 0; // Leer el bit correspondiente
+    return ESP_OK;
+}

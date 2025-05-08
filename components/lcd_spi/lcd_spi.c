@@ -1,4 +1,5 @@
 #include "lcd_spi.h"
+#include "axp192.h"
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
@@ -12,11 +13,11 @@
 #define LCD_HEIGHT 240
 
 #define PIN_NUM_MOSI 23
+#define PIN_NUM_MISO 38
 #define PIN_NUM_CLK 18
 #define PIN_NUM_CS 5
 #define PIN_NUM_DC 15
-#define PIN_NUM_RST 4
-#define PIN_NUM_BCKL 32
+//#define PIN_NUM_RST 18 RST managed by AXP192
 
 static spi_device_handle_t lcd_handle;
 
@@ -24,7 +25,7 @@ esp_err_t lcd_spi_init(void)
 {
     esp_err_t ret = ESP_FAIL;
     gpio_config_t io_conf = {
-        .pin_bit_mask = (1ULL << PIN_NUM_DC) | (1ULL << PIN_NUM_RST) | (1ULL << PIN_NUM_BCKL),
+        .pin_bit_mask = (1ULL << PIN_NUM_DC),
         .mode = GPIO_MODE_OUTPUT,
         .pull_up_en = false,
         .pull_down_en = false,
@@ -32,10 +33,12 @@ esp_err_t lcd_spi_init(void)
     };
     gpio_config(&io_conf);
 
+    axp_set_gpio_mode(4, GPIO_MODE_OUTPUT); // Configurar GPIO4 como salida
+
     // Screen reset
-    gpio_set_level(PIN_NUM_RST, 0);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-    gpio_set_level(PIN_NUM_RST, 1);
+    axp192_set_gpio_state(4, false); // Bajar el nivel de GPIO4
+    vTaskDelay(100 / portTICK_PERIOD_MS); // Esperar 100ms
+    axp192_set_gpio_state(4, true); // Subir el nivel de GPIO4
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
     // Configure SPI
@@ -175,11 +178,16 @@ void lcd_send_data(const uint8_t *data, size_t len)
 
 // Fill screen with solid color
 void lcd_fill_color(uint16_t color){
+    ESP_LOGI(TAG, "Filling color: %04X", color);
     lcd_set_address_window(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1);
+    ESP_LOGI(TAG, "Set adress window");
     uint8_t data[2] = {color >> 8, color & 0xFF};
-    for (int i = 0; i < LCD_WIDTH * LCD_HEIGHT; i++)
+    for (uint16_t i = 0; i < LCD_WIDTH ; i++)
     {
-        lcd_send_data(data, sizeof(data));
+        for (uint16_t j = 0; j < LCD_HEIGHT; j++)
+        {
+            lcd_send_data(data, sizeof(data));
+        }
     }
 }
 // Set adress

@@ -3,21 +3,31 @@
 #include "i2c_bus.h"
 #include "lcd_spi.h"
 #include "axp192.h"
+#include "esp_log.h"
+
+
+#define TAG "MAIN"
 
 float vbat, vbus, temp, charge_current, discharge_current;
 uint8_t level;
 bool charging;
 
+
+
 void app_main(void)
 {
 
     i2c_bus_init(I2C_NUM_0, GPIO_NUM_21, GPIO_NUM_22, 400000);
+    ESP_LOGI(TAG, "I2C bus initialized.");
     axp192_set_dcdc3(true);        // Backlight ON
     axp192_set_dcdc3_voltage(3.3); // Set DCDC3 voltage to 3.3V
 
     lcd_spi_init();
+    ESP_LOGI(TAG, "LCD SPI initialized.");
     lcd_fill_color(color565(100, 0, 100)); // Fill screen with black color
-    // lcd_fill_rect(60,40,200,160,color565(255, 0, 0)); // Fill rectangle with red color
+    ESP_LOGI(TAG, "Fill color.");
+    //lcd_fill_rect(60,40,200,160,color565(25/5, 0, 0)); // Fill rectangle with red color
+    //ESP_LOGI(TAG, "Rectangle.");
 
     /*
         uint8_t id = 0;
