@@ -12,6 +12,8 @@
         "*.c": "c",
         "i2c_bus.h": "c",
         "stdio.h": "c",
-        "esp_err.h": "c"
+        "esp_err.h": "c",
+        "axp192.h": "c",
+        "spi_master.h": "c"
     }
 }

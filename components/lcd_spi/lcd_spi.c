@@ -33,7 +33,7 @@ esp_err_t lcd_spi_init(void)
     };
     gpio_config(&io_conf);
 
-    axp_set_gpio_mode(4, GPIO_MODE_OUTPUT); // Configurar GPIO4 como salida
+    axp192_set_gpio_mode(4, GPIO_MODE_OUTPUT); // Configurar GPIO4 como salida
 
     // Screen reset
     axp192_set_gpio_state(4, false); // Bajar el nivel de GPIO4
